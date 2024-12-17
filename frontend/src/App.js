@@ -17,8 +17,8 @@ function Canvas() {
         }
 
         function setPainting(event) {
-            updatePos(event)
-            painting = true
+            updatePos(event);
+            painting = true;
         }
 
         function unsetPainting() {
@@ -28,10 +28,10 @@ function Canvas() {
         function draw(event) {
             if (painting) {
                 context.lineWidth = penWidth;
-                context.moveTo(xcor, ycor)
+                context.moveTo(xcor, ycor);
                 updatePos(event);
                 context.lineTo(xcor, ycor);
-                context.stroke()
+                context.stroke();
             }
 
         }
