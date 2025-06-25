@@ -1,51 +1,67 @@
-import logo from './logo.svg';
 import './App.css';
-import { useEffect } from 'react';
+import { useEffect, useState, useRef } from 'react';
+
+const penStyle = {
+    strokeStyle: "black",
+    lineWidth: 3,
+    lineCap: "round"
+};
 
 function Canvas() {
-    useEffect (() => {
-        const canvas = document.getElementById("whiteboard");
+
+    const canvasRef = useRef(null);
+    const contextRef = useRef(null)
+    const [painting, setPainting] = useState(false);
+    const coordinates = useRef([0, 0]);
+
+    useEffect(() => {
+        const canvas = canvasRef.current;
         const context = canvas.getContext("2d");
-        let xcor = 0;
-        let ycor = 0;
-        const penWidth = 3;
-        let painting = false;
+        context.strokeStyle = penStyle.strokeStyle;
+        context.lineWidth = penStyle.lineWidth;
+        context.lineCap = penStyle.lineCap;
+        
+        contextRef.current = context;
+    }, [canvasRef, contextRef]);
 
-        function updatePos(event) {
-            xcor = event.clientX;
-            ycor = event.clientY;
+
+    function updatePos(event) {
+        coordinates.current = [event.clientX, event.clientY]
+    }
+
+    function startPainting(event) {
+        updatePos(event);
+        setPainting(true)
+    }
+
+    function stopPainting(event) {
+        setPainting(false)
+    }
+
+    function draw(event) {
+        if (painting) {
+            const x = event.clientX;
+            const y = event.clientY;
+
+            contextRef.current.beginPath()
+            contextRef.current.moveTo(coordinates.current[0], coordinates.current[1])
+            contextRef.current.lineTo(x, y);
+            contextRef.current.stroke();
+            updatePos(event)
         }
-
-        function setPainting(event) {
-            updatePos(event);
-            painting = true;
-        }
-
-        function unsetPainting() {
-            painting = false
-        }
-
-        function draw(event) {
-            if (painting) {
-                context.lineWidth = penWidth;
-                context.moveTo(xcor, ycor);
-                updatePos(event);
-                context.lineTo(xcor, ycor);
-                context.stroke();
-            }
-
-        }
-
-        document.addEventListener("mousedown", setPainting);
-        document.addEventListener("mouseup", unsetPainting);
-        document.addEventListener("mousemove", draw);
-
-    });
+    }
 
     return (
         // canvas width and height is the entire window for now, will consider
         // tool bar later
-        <canvas id="whiteboard" width={window.innerWidth} height={window.innerHeight}>
+        <canvas 
+            ref={canvasRef}
+            width={window.innerWidth} 
+            height={window.innerHeight}
+            onMouseDown={startPainting}
+            onMouseUp={stopPainting}
+            onMouseMove={draw}
+        >
         </canvas>
     );
 }
