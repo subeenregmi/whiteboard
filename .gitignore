@@ -333,3 +333,5 @@ web/.yarn/*
 # Asdf package manager
 
 /*/.tool-versions
+
+.DS_Store

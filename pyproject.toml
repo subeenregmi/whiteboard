@@ -1,0 +1,18 @@
+[project]
+name = "whiteboard"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "Subeen",email = "subeenregmi123@gmail.com"},
+    {name = "Gagan", email = "gagan@email.com"}
+]
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "flask (>=3.1.1,<4.0.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
