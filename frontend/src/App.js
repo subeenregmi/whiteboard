@@ -10,7 +10,7 @@ const penStyle = {
 function Canvas() {
 
     const canvasRef = useRef(null);
-    const contextRef = useRef(null)
+    const contextRef = useRef(null);
     const [painting, setPainting] = useState(false);
     const coordinates = useRef([0, 0]);
 
