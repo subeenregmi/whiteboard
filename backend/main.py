@@ -1,5 +1,5 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
-from typing import *
+from typing import Dict
 from ws import ConnectionManager
 
 app = FastAPI()
@@ -15,7 +15,7 @@ async def websocket_endpoint(websocket: WebSocket, board_id: int):
         managers[board_id] = ConnectionManager()
     
     manager = managers[board_id]
-    await manager.conenct(websocket)
+    await manager.connect(websocket)
     
     try:
         while True:
