@@ -10,3 +10,4 @@ class Stroke(BaseModel):
     timestamp: datetime
     coordinates: list[tuple[int, int]]
     color: Color
+    width: int
