@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef, ChangeEvent } from "react";
 import WhiteboardWS from '@/utils/ws';
 import { Caveat } from "next/font/google";
+import { Stroke } from "@/utils/stroke";
 
 const ws = new WhiteboardWS();
 
@@ -20,7 +21,14 @@ export default function Whiteboard() {
     const [strokeColour, setStrokeColour] = useState<string>("green");
     const [strokeWidth, setStrokeWidth] = useState<number>(10);
 
-    let currentStroke: [number, number][] = [];
+    let currentStroke: Stroke = {
+        id: 1,
+        uname: "Unknown",
+        timestamp: Date.now(),
+        coordinates: [],
+        color: strokeColour,
+        width: strokeWidth,
+    };
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -54,7 +62,16 @@ export default function Whiteboard() {
 
     function stopPainting(event: React.MouseEvent) {
         ws.sendStroke(currentStroke);
-        currentStroke = [];
+
+        currentStroke = {
+            id: 1,
+            uname: "Unknown",
+            timestamp: Date.now(),
+            coordinates: [],
+            color: strokeColour,
+            width: strokeWidth,
+        };
+
         setPainting(false)
     }
 
@@ -66,7 +83,7 @@ export default function Whiteboard() {
             contextRef.current!.strokeStyle = strokeColour;
             contextRef.current!.lineWidth = strokeWidth;
 
-            currentStroke.push([x, y]);
+            currentStroke.coordinates.push([x, y]);
 
             contextRef.current?.beginPath()
             contextRef.current?.moveTo(coordinates.current[0], coordinates.current[1])
