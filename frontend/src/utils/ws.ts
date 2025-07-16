@@ -25,11 +25,18 @@ export default class WhiteboardWS {
             const context = contextRef.current;
 
             context?.beginPath();
-            if (stroke.coordinates.length == 1) {
-                const c = stroke.coordinates[0];
-                context?.fillRect(c[0], c[1], 1, 1)
 
+            const c = stroke.coordinates?.[0]
+
+            if (stroke.coordinates.length == 0) {
+                // Do nothing
+            }
+            else if (stroke.coordinates.length == 1) {
+                context?.moveTo(c[0], c[1])
+                context?.fillRect(c[0], c[1], 1, 1)
             } else {
+                const c = stroke.coordinates[0];
+                context?.moveTo(c[0], c[1])
                 stroke.coordinates.forEach((x) => {
                     context?.lineTo(x[0], x[1]);
                 })
