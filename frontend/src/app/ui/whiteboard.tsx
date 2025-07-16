@@ -22,7 +22,7 @@ export default function Whiteboard() {
     const [strokeWidth, setStrokeWidth] = useState<number>(10);
 
     let currentStroke: Stroke = {
-        id: 1,
+        id: Date.now(),
         uname: "Unknown",
         timestamp: Date.now(),
         coordinates: [],
