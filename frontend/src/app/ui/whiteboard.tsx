@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useRef } from "react";
+import WhiteboardWS from '@/utils/ws';
 
 interface PenStyle {
     strokeStyle: string;
@@ -14,12 +15,15 @@ const penStyle: PenStyle = {
     lineCap: "round"
 }
 
+const ws = new WhiteboardWS();
+
 export default function Whiteboard() {
 
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const contextRef = useRef<CanvasRenderingContext2D>(null);
     const [painting, setPainting] = useState<boolean>(false);
     const coordinates = useRef<number[]>([1, 0]);
+    let currentStroke: [number, number][] = [];
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -32,8 +36,9 @@ export default function Whiteboard() {
         context!.lineWidth = penStyle.lineWidth;
         context!.lineCap = penStyle.lineCap;
         
-
         contextRef.current = context!;
+
+        ws.handleIncomingStroke(contextRef)
 
     }, [canvasRef, contextRef, penStyle]);
 
@@ -47,6 +52,8 @@ export default function Whiteboard() {
     }
 
     function stopPainting(event: React.MouseEvent) {
+        ws.sendStroke(currentStroke);
+        currentStroke = [];
         setPainting(false)
     }
 
@@ -55,11 +62,12 @@ export default function Whiteboard() {
             const x = event.clientX;
             const y = event.clientY;
 
+            currentStroke.push([x, y]);
+
             contextRef.current?.beginPath()
             contextRef.current?.moveTo(coordinates.current[0], coordinates.current[1])
             contextRef.current?.lineTo(x, y);
             contextRef.current?.stroke();
-            console.log(contextRef.current?.lineWidth)
             updatePos(event)
         }
     }
