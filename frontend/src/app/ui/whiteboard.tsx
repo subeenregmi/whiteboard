@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useRef } from "react";
 import WhiteboardWS from '@/utils/ws';
-import { Caveat } from "next/font/google";
 
 interface PenStyle {
     strokeStyle: string;
@@ -65,6 +64,7 @@ export default function Whiteboard() {
     }
 
     function draw(event: React.MouseEvent) {
+        
         if (painting) {
             const x = event.clientX * SCALE_FACTOR;
             const y = event.clientY * SCALE_FACTOR;
