@@ -24,6 +24,9 @@ export default class WhiteboardWS {
             const stroke: Stroke = JSON.parse(event.data)
             const context = contextRef.current;
 
+            context!.strokeStyle = stroke.color;
+            context!.lineWidth = stroke.width;
+
             context?.beginPath();
 
             const c = stroke.coordinates?.[0]
@@ -45,17 +48,7 @@ export default class WhiteboardWS {
         }
     }
 
-    public sendStroke(coordinates: [number, number][]) {
-        const stroke: Stroke = {
-            id: 1,
-            uname: "Unknown",
-            coordinates: coordinates,
-            color: "#000000",
-            timestamp: Date.now(),
-            width: 10,
-        };
-
-
-        this.ws.send(JSON.stringify(stroke))
+    public sendStroke(s: Stroke) {
+        this.ws.send(JSON.stringify(s));
     }
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, ChangeEvent } from "react";
 import WhiteboardWS from '@/utils/ws';
 
 interface PenStyle {
@@ -15,9 +15,14 @@ const penStyle: PenStyle = {
     lineCap: "round"
 }
 
+import { Stroke } from "@/utils/stroke";
+
+
 const ws = new WhiteboardWS();
 
 const SCALE_FACTOR: number = 2;
+const MIN_STROKE_WIDTH: number = 1;
+const MAX_STROKE_WIDTH: number = 100;
 
 export default function Whiteboard() {
 
@@ -25,7 +30,18 @@ export default function Whiteboard() {
     const contextRef = useRef<CanvasRenderingContext2D>(null);
     const [painting, setPainting] = useState<boolean>(false);
     const coordinates = useRef<number[]>([0, 0]);
-    let currentStroke: [number, number][] = [];
+
+    const [strokeColour, setStrokeColour] = useState<string>("green");
+    const [strokeWidth, setStrokeWidth] = useState<number>(10);
+
+    let currentStroke: Stroke = {
+        id: Date.now(),
+        uname: "Unknown",
+        timestamp: Date.now(),
+        coordinates: [],
+        color: strokeColour,
+        width: strokeWidth,
+    };
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -36,15 +52,15 @@ export default function Whiteboard() {
         canvas!.style.height = `${window.innerHeight}px`;
         canvas!.style.width = `${window.innerWidth}px`;
 
-        context!.strokeStyle = penStyle.strokeStyle;
-        context!.lineWidth = penStyle.lineWidth;
-        context!.lineCap = penStyle.lineCap;
+        context!.strokeStyle = strokeColour;
+        context!.lineWidth = strokeWidth;
+        context!.lineCap = "round";
         
         contextRef.current = context!;
 
         ws.handleIncomingStroke(contextRef)
 
-    }, [canvasRef, contextRef, penStyle]);
+    }, [canvasRef, contextRef]);
 
     function updatePos(event: React.MouseEvent) {
         const x = event.clientX * SCALE_FACTOR;
@@ -59,7 +75,16 @@ export default function Whiteboard() {
 
     function stopPainting(event: React.MouseEvent) {
         ws.sendStroke(currentStroke);
-        currentStroke = [];
+
+        currentStroke = {
+            id: 1,
+            uname: "Unknown",
+            timestamp: Date.now(),
+            coordinates: [],
+            color: strokeColour,
+            width: strokeWidth,
+        };
+
         setPainting(false)
     }
 
@@ -68,8 +93,11 @@ export default function Whiteboard() {
         if (painting) {
             const x = event.clientX * SCALE_FACTOR;
             const y = event.clientY * SCALE_FACTOR;
+            
+            contextRef.current!.strokeStyle = strokeColour;
+            contextRef.current!.lineWidth = strokeWidth;
 
-            currentStroke.push([x, y]);
+            currentStroke.coordinates.push([x, y]);
 
             contextRef.current?.beginPath()
             contextRef.current?.moveTo(coordinates.current[0], coordinates.current[1])
@@ -79,16 +107,42 @@ export default function Whiteboard() {
         }
     }
 
+    function changeStrokeColour(event: React.ChangeEvent<HTMLInputElement>) {
+        setStrokeColour(event.target.value);
+    }
+
+    function changeStrokeWidth(event: React.ChangeEvent<HTMLInputElement>) {
+        setStrokeWidth(Number(event.target.value));
+    }
+
     return (
-        // canvas width and height is the entire window for now, will consider
-        // tool bar later
-        <canvas 
-            ref={canvasRef}
-            className="bg-white"
-            onMouseDown={startPainting}
-            onMouseUp={stopPainting}
-            onMouseMove={draw}
-        >
-        </canvas>
+        
+        // added a simple toolbar at the top for testing
+        <>
+            <input
+                type="color"
+                value={strokeColour}
+                onChange={changeStrokeColour}
+            >
+            </input>
+
+            <input
+                type="range"
+                value={strokeWidth}
+                min={MIN_STROKE_WIDTH}
+                max={MAX_STROKE_WIDTH}
+                onChange={changeStrokeWidth}
+            >
+            </input>
+
+            <canvas 
+                ref={canvasRef}
+                className="bg-white"
+                onMouseDown={startPainting}
+                onMouseUp={stopPainting}
+                onMouseMove={draw}
+            >
+            </canvas>
+        </>
     );
 }
