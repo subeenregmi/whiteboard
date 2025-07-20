@@ -20,17 +20,18 @@ async def websocket_endpoint(websocket: WebSocket, board_id: int):
     await manager.connect(websocket)
 
     # to load in all previous strokes
-    strokes = stroke_store.load_stroke_history(board_id)
+    strokes = await stroke_store.load_stroke_history(board_id)
     if strokes:
         for stroke in strokes:
-            await websocket.send_text(stroke)
+            s = Stroke.model_validate(stroke)
+            await websocket.send_text(s.model_dump_json())
 
     try:
         while True:
             data = await websocket.receive_json()
             try:
                 stroke = Stroke.model_validate(data)
-                stroke_store.save_stroke(board_id, stroke)
+                await stroke_store.save_stroke(board_id, stroke)
                 await manager.broadcast_board_data(stroke)
 
             except ValidationError as e:
