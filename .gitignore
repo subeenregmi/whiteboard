@@ -335,3 +335,5 @@ web/.yarn/*
 /*/.tool-versions
 
 .DS_Store
+
+*.rdb

@@ -1,16 +1,17 @@
 # Whiteboard App
 
-Backend
+## Backend
 ```bash
+redis-server
 cd backend
 source .venv/bin/activate
 poetry install
 poetry run fastapi dev main.py
 ```
-Frontend
+## Frontend
 
 ```bash
 cd frontend
 npm install 
-npm start #or npm dev
+npm start #or npm run dev
 ```

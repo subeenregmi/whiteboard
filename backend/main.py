@@ -4,28 +4,33 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from models.stroke import Stroke
 from pydantic import ValidationError
 from ws.ws import ConnectionManager
+from rs.rs import StrokeStore
 
 app = FastAPI()
-
-# mapping between the board_id and the manager for that board
 managers: Dict[int, ConnectionManager] = {}
-
+stroke_store = StrokeStore()
 
 # could use query parameters to implement password to join boards
 @app.websocket("/ws/{board_id}")
 async def websocket_endpoint(websocket: WebSocket, board_id: int):
-    # create new board if doesnt already exist
     if board_id not in managers:
         managers[board_id] = ConnectionManager()
 
     manager = managers[board_id]
     await manager.connect(websocket)
 
+    # to load in all previous strokes
+    strokes = stroke_store.load_stroke_history(board_id)
+    if strokes:
+        for stroke in strokes:
+            await websocket.send_text(stroke)
+
     try:
         while True:
             data = await websocket.receive_json()
             try:
                 stroke = Stroke.model_validate(data)
+                stroke_store.save_stroke(board_id, stroke)
                 await manager.broadcast_board_data(stroke)
 
             except ValidationError as e:
