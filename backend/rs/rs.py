@@ -15,4 +15,8 @@ class StrokeStore:
         await self.client.srem(str(board_id), data.model_dump_json())
     
     async def load_stroke_history(self, board_id: int):
-        return await self.client.smembers(str(board_id))
+        mems = await self.client.smembers(str(board_id))
+        ret = set()
+        for mem in mems:
+            ret.add(mem.decode("utf-8"))
+        return ret

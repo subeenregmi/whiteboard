@@ -5,6 +5,7 @@ from models.stroke import Stroke
 from pydantic import ValidationError
 from ws.ws import ConnectionManager
 from rs.rs import StrokeStore
+import json
 
 app = FastAPI()
 managers: Dict[int, ConnectionManager] = {}
@@ -21,10 +22,9 @@ async def websocket_endpoint(websocket: WebSocket, board_id: int):
 
     # to load in all previous strokes
     strokes = await stroke_store.load_stroke_history(board_id)
-    if strokes:
-        for stroke in strokes:
-            s = Stroke.model_validate(stroke)
-            await websocket.send_text(s.model_dump_json())
+    for stroke in strokes:
+        s = Stroke.model_validate(json.loads(stroke))
+        await websocket.send_text(s.model_dump_json())
 
     try:
         while True:
