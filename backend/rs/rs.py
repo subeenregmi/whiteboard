@@ -16,7 +16,4 @@ class StrokeStore:
     
     async def load_stroke_history(self, board_id: int):
         mems = await self.client.smembers(str(board_id))
-        ret = set()
-        for mem in mems:
-            ret.add(mem.decode("utf-8"))
-        return ret
+        return {mem.decode("utf-8") for mem in mems}
