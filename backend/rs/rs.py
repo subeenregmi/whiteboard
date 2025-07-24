@@ -1,7 +1,7 @@
 from redis import asyncio as asyncredis
 from models.stroke import Stroke
 
-HOST = "localhost"
+HOST = "redis"
 PORT = 6379
 
 class StrokeStore:
