@@ -2,8 +2,21 @@
 
 import { useEffect, useState, useRef, ChangeEvent } from "react";
 import WhiteboardWS from '@/utils/ws';
-import { Caveat } from "next/font/google";
+
+interface PenStyle {
+    strokeStyle: string;
+    lineWidth: number;
+    lineCap: CanvasLineCap;
+};
+
+const penStyle: PenStyle = {
+    strokeStyle: "green",
+    lineWidth: 10,
+    lineCap: "round"
+}
+
 import { Stroke } from "@/utils/stroke";
+
 
 const ws = new WhiteboardWS();
 
@@ -76,6 +89,7 @@ export default function Whiteboard() {
     }
 
     function draw(event: React.MouseEvent) {
+        
         if (painting) {
             const x = event.clientX * SCALE_FACTOR;
             const y = event.clientY * SCALE_FACTOR;
