@@ -48,7 +48,7 @@ export default function Login() {
 
                 <p className="text-center mt-4 text-sm text-gray-600">
                     No account? Sign up
-                    <Link href="/signup" className="text-blue-600 hover:underline mx-1">
+                    <Link href="/info/signup" className="text-blue-600 hover:underline mx-1">
                         here!
                     </Link>
                 </p>
