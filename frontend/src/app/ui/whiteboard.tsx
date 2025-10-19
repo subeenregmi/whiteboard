@@ -1,32 +1,40 @@
 "use client";
 
-import { useEffect, useState, useRef, ChangeEvent } from "react";
+import { useEffect, useRef } from "react";
 import WhiteboardWS from "@/utils/ws";
-import { Caveat } from "next/font/google";
-import { Stroke } from "@/utils/stroke";
+import { Stroke } from "@/models/stroke";
+import {
+    DEFAULT_COLOR,
+    DEFAULT_STYLE,
+    DEFAULT_THICKNESS,
+    Pen,
+    Position,
+    SCALE_FACTOR,
+    MIN_STROKE_WIDTH,
+    MAX_STROKE_WIDTH,
+} from "@/models/constants";
 
 const ws = new WhiteboardWS();
-
-const SCALE_FACTOR: number = 2;
-const MIN_STROKE_WIDTH: number = 1;
-const MAX_STROKE_WIDTH: number = 100;
 
 export default function Whiteboard() {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const contextRef = useRef<CanvasRenderingContext2D>(null);
-    const [painting, setPainting] = useState<boolean>(false);
-    const coordinates = useRef<number[]>([0, 0]);
 
-    const [strokeColour, setStrokeColour] = useState<string>("green");
-    const [strokeWidth, setStrokeWidth] = useState<number>(10);
+    let currentPosition: Position = [0, 0];
 
-    let currentStroke: Stroke = {
+    let painting = false;
+
+    const pen: Pen = {
+        color: DEFAULT_COLOR,
+        thickness: DEFAULT_THICKNESS,
+        style: DEFAULT_STYLE,
+    };
+
+    const currentStroke: Stroke = {
         id: Date.now(),
-        uname: "Unknown",
-        timestamp: Date.now(),
+        uname: "test",
         coordinates: [],
-        color: strokeColour,
-        width: strokeWidth,
+        pen: pen,
     };
 
     useEffect(() => {
@@ -38,86 +46,79 @@ export default function Whiteboard() {
         canvas!.style.height = `${window.innerHeight}px`;
         canvas!.style.width = `${window.innerWidth}px`;
 
-        context!.strokeStyle = strokeColour;
-        context!.lineWidth = strokeWidth;
-        context!.lineCap = "round";
+        context!.strokeStyle = pen.color;
+        context!.lineWidth = pen.thickness;
+        context!.lineCap = pen.style;
 
         contextRef.current = context!;
 
         ws.handleIncomingStroke(contextRef);
-    }, [canvasRef, contextRef]);
+    }, [pen.color, pen.thickness, pen.style]);
 
     function updatePos(event: React.MouseEvent) {
         const x = event.clientX * SCALE_FACTOR;
-        const y = event.clientY * SCALE_FACTOR;
-        coordinates.current = [x, y];
+
+        // hack to handle the displacement the top toolbar causes
+        const y = event.clientY * SCALE_FACTOR - 48;
+        currentPosition = [x, y];
     }
 
     function startPainting(event: React.MouseEvent) {
         updatePos(event);
-        setPainting(true);
+        painting = true;
     }
 
-    function stopPainting(event: React.MouseEvent) {
+    function stopPainting() {
+        currentStroke.timestamp = Date.now();
+
         ws.sendStroke(currentStroke);
 
-        currentStroke = {
-            id: 1,
-            uname: "Unknown",
-            timestamp: Date.now(),
-            coordinates: [],
-            color: strokeColour,
-            width: strokeWidth,
-        };
+        currentStroke.coordinates = [];
 
-        setPainting(false);
+        painting = false;
     }
 
     function draw(event: React.MouseEvent) {
         if (painting) {
             const x = event.clientX * SCALE_FACTOR;
-            const y = event.clientY * SCALE_FACTOR;
 
-            contextRef.current!.strokeStyle = strokeColour;
-            contextRef.current!.lineWidth = strokeWidth;
+            // hack to handle the displacement the top toolbar causes
+            const y = event.clientY * SCALE_FACTOR - 48;
+
+            contextRef.current!.strokeStyle = pen.color;
+            contextRef.current!.lineWidth = pen.thickness;
 
             currentStroke.coordinates.push([x, y]);
 
             contextRef.current?.beginPath();
-            contextRef.current?.moveTo(
-                coordinates.current[0],
-                coordinates.current[1],
-            );
+            contextRef.current?.moveTo(currentPosition[0], currentPosition[1]);
             contextRef.current?.lineTo(x, y);
             contextRef.current?.stroke();
             updatePos(event);
         }
     }
 
-    function changeStrokeColour(event: React.ChangeEvent<HTMLInputElement>) {
-        setStrokeColour(event.target.value);
+    function changePenColor(event: React.ChangeEvent<HTMLInputElement>) {
+        pen.color = event.target.value;
     }
 
-    function changeStrokeWidth(event: React.ChangeEvent<HTMLInputElement>) {
-        setStrokeWidth(Number(event.target.value));
+    function changePenThickness(event: React.ChangeEvent<HTMLInputElement>) {
+        pen.thickness = Number(event.target.value);
     }
 
     return (
         // added a simple toolbar at the top for testing
         <>
-            <input
-                type="color"
-                value={strokeColour}
-                onChange={changeStrokeColour}
-            ></input>
+            <div className="h-12">
+                <input type="color" onChange={changePenColor}></input>
 
-            <input
-                type="range"
-                value={strokeWidth}
-                min={MIN_STROKE_WIDTH}
-                max={MAX_STROKE_WIDTH}
-                onChange={changeStrokeWidth}
-            ></input>
+                <input
+                    type="range"
+                    min={MIN_STROKE_WIDTH}
+                    max={MAX_STROKE_WIDTH}
+                    onChange={changePenThickness}
+                ></input>
+            </div>
 
             <canvas
                 ref={canvasRef}
