@@ -8,7 +8,9 @@ docker compose up --build
 ```
 
 ### Locally
+
 1. Setup backend locally
+
 ```bash
 cd backend
 python -m venv .venv
@@ -25,7 +27,7 @@ npm install
 npm run dev
 ```
 
-## Ports
+## Services
 
 | Service  | Port |
 |----------|------|
