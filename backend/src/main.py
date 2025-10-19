@@ -26,9 +26,18 @@ async def websocket_endpoint(websocket: WebSocket, board_id: int):
 
     # to load in all previous strokes
     strokes = await stroke_store.load_stroke_history(board_id)
+    sorted_strokes = []
+
     for stroke in strokes:
-        s = Stroke.model_validate(json.loads(stroke))
-        await websocket.send_text(s.model_dump_json())
+        try:
+            s = Stroke.model_validate(json.loads(stroke))
+            sorted_strokes.append(s)
+        except ValidationError as e:
+            logger.error(e)
+
+    sorted_strokes.sort(key=lambda x: x.timestamp)
+    for stroke in sorted_strokes:
+        await websocket.send_text(stroke.model_dump_json())
 
     try:
         while True:
