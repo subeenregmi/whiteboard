@@ -11,6 +11,7 @@ app = FastAPI()
 managers: Dict[int, ConnectionManager] = {}
 stroke_store = StrokeStore()
 
+
 # could use query parameters to implement password to join boards
 @app.websocket("/ws/{board_id}")
 async def websocket_endpoint(websocket: WebSocket, board_id: int):
