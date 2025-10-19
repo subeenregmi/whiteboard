@@ -4,6 +4,8 @@ services:
       context: ./backend
     ports:
       - "8000:8000"
+    volumes:
+      - ./backend/src:/app/src
     environment:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
@@ -29,6 +31,9 @@ services:
   frontend:
     build:
       context: ./frontend
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
     ports:
       - "3000:3000"
     depends_on:

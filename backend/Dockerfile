@@ -1,12 +1,14 @@
 FROM python:3.13-slim
 
-RUN pip install poetry
-
 WORKDIR /app
 
-COPY pyproject.toml poetry.lock ./
+RUN pip install poetry
+
+COPY poetry.lock pyproject.toml /app/
+
 RUN poetry install
-COPY . .
+
+WORKDIR /app/src
 
 EXPOSE 8000
 

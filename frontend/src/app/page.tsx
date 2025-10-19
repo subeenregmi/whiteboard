@@ -1,7 +1,6 @@
-import Whiteboard from '@/app/ui/whiteboard';
+import Whiteboard from "@/app/ui/whiteboard";
 
 export default function Page() {
-  return (
-    <Whiteboard></Whiteboard>
-  )
+    return <Whiteboard></Whiteboard>;
 }
+
