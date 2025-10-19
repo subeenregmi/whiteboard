@@ -12,9 +12,3 @@ export enum Action {
     Stroke = 1,
     MouseMove = 2,
 }
-
-export interface Pen {
-    color: string;
-    thickness: number;
-    style: CanvasLineCap;
-}

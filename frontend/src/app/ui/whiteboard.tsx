@@ -7,12 +7,12 @@ import {
     DEFAULT_COLOR,
     DEFAULT_STYLE,
     DEFAULT_THICKNESS,
-    Pen,
     Position,
     SCALE_FACTOR,
     MIN_STROKE_WIDTH,
     MAX_STROKE_WIDTH,
 } from "@/models/constants";
+import { Pen } from "@/models/pen";
 
 const ws = new WhiteboardWS();
 
