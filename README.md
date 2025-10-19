@@ -28,7 +28,7 @@ npm run dev
 ## Ports
 
 | Service  | Port |
-------------------
+|----------|------|
 | redis    | 6379 |
 | frontend | 3000 |
 | backend  | 8000 | 
