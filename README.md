@@ -1,5 +1,11 @@
 # Whiteboard App
 
+little whiteboard - currently in development :)
+
+## Dependencies
+
+- [poetry](https://python-poetry.org/)
+
 ## Setup
 
 ### Docker
@@ -13,8 +19,7 @@ docker compose up --build
 
 ```bash
 cd backend
-python -m venv .venv
-source .venv/bin/activate
+poetry env activate
 poetry install
 poetry run uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 ```
