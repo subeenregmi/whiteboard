@@ -9,10 +9,9 @@ import {
     DEFAULT_THICKNESS,
     Position,
     SCALE_FACTOR,
-    MIN_STROKE_WIDTH,
-    MAX_STROKE_WIDTH,
 } from "@/models/constants";
 import { Pen } from "@/models/pen";
+import Toolbar from "./toolbar";
 
 const ws = new WhiteboardWS();
 
@@ -107,19 +106,11 @@ export default function Whiteboard() {
     }
 
     return (
-        // added a simple toolbar at the top for testing
         <>
-            <div className="h-12">
-                <input type="color" onChange={changePenColor}></input>
-
-                <input
-                    type="range"
-                    min={MIN_STROKE_WIDTH}
-                    max={MAX_STROKE_WIDTH}
-                    onChange={changePenThickness}
-                ></input>
-            </div>
-
+            <Toolbar
+                penColorChanger={changePenColor}
+                penThicknessChanger={changePenThickness}
+            />
             <canvas
                 ref={canvasRef}
                 className="bg-white"
