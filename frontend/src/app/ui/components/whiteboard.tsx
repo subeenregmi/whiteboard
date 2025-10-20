@@ -12,6 +12,7 @@ import {
 } from "@/models/constants";
 import { Pen } from "@/models/pen";
 import Toolbar from "./toolbar";
+import { timeStamp } from "node:console";
 
 const ws = new WhiteboardWS();
 
@@ -22,6 +23,7 @@ export default function Whiteboard() {
     let currentPosition: Position = [0, 0];
 
     let painting = false;
+    let erasing = false;
 
     const [strokes, setStrokes] = useState<Stroke[]>([]);
 
@@ -96,16 +98,17 @@ export default function Whiteboard() {
         currentPosition = [x, y];
     }
 
-    function startPainting(event: React.MouseEvent) {
-        updatePos(event);
+    function startPainting() {
         painting = true;
     }
 
     function stopPainting() {
-        currentStroke.timestamp = Date.now();
-
-        ws.sendStroke(currentStroke);
-        setStrokes([...strokes, currentStroke]);
+        const finishedStroke: Stroke = {
+            ...currentStroke,
+            timestamp: Date.now(),
+        };
+        ws.sendStroke(finishedStroke);
+        setStrokes([...strokes, finishedStroke]);
 
         console.log(strokes);
 
@@ -114,24 +117,82 @@ export default function Whiteboard() {
         painting = false;
     }
 
-    function draw(event: React.MouseEvent) {
-        if (painting) {
-            const x = event.clientX * SCALE_FACTOR;
+    function handleDraw(event: React.MouseEvent) {
+        const x = event.clientX * SCALE_FACTOR;
 
-            // hack to handle the displacement the top toolbar causes
-            const y = event.clientY * SCALE_FACTOR - 48;
+        // hack to handle the displacement the top toolbar causes
+        const y = event.clientY * SCALE_FACTOR - 48;
 
-            contextRef.current!.strokeStyle = pen.color;
-            contextRef.current!.lineWidth = pen.thickness;
+        contextRef.current!.strokeStyle = pen.color;
+        contextRef.current!.lineWidth = pen.thickness;
 
-            currentStroke.coordinates.push([x, y]);
+        currentStroke.coordinates.push([x, y]);
 
-            contextRef.current?.beginPath();
-            contextRef.current?.moveTo(currentPosition[0], currentPosition[1]);
-            contextRef.current?.lineTo(x, y);
-            contextRef.current?.stroke();
-            updatePos(event);
+        contextRef.current?.beginPath();
+        contextRef.current?.moveTo(currentPosition[0], currentPosition[1]);
+        contextRef.current?.lineTo(x, y);
+        contextRef.current?.stroke();
+        updatePos(event);
+    }
+
+    function startErasing() {
+        erasing = true;
+    }
+
+    function stopErasing() {
+        erasing = false;
+    }
+
+    function handleErasing(event: React.MouseEvent) {
+        const x = event.clientX * SCALE_FACTOR;
+
+        // hack to handle the displacement the top toolbar causes
+        const y = event.clientY * SCALE_FACTOR - 48;
+
+        //console.log("Currently erasing!", [x, y]);
+
+        for (let i = 0; i < strokes.length; i++) {
+            for (const coord of strokes[i].coordinates) {
+                const dist = Math.sqrt(
+                    Math.pow(coord[0] - x, 2) + Math.pow(coord[1] - y, 2),
+                );
+                if (dist < 10) {
+                    console.log("Stroke", strokes[i]);
+                    strokes[i].pen.color = "red";
+                    setStrokes(strokes);
+                }
+            }
         }
+    }
+
+    function handleMouseDown(event: React.MouseEvent) {
+        updatePos(event);
+
+        if (isEraserSelected) {
+            console.log("Starting to erase!");
+            startErasing();
+        } else {
+            startPainting();
+        }
+    }
+
+    function handleMouseUp() {
+        if (erasing) {
+            console.log("Stopping erasing!");
+            stopErasing();
+        } else if (painting) {
+            stopPainting();
+        }
+    }
+
+    function handleMouseMovement(event: React.MouseEvent) {
+        if (painting) {
+            handleDraw(event);
+        } else if (erasing) {
+            handleErasing(event);
+        }
+
+        //console.log(strokes);
     }
 
     function changePenColor(event: React.ChangeEvent<HTMLInputElement>) {
@@ -159,11 +220,13 @@ export default function Whiteboard() {
             <canvas
                 ref={canvasRef}
                 className="bg-white"
-                onMouseDown={startPainting}
-                onMouseUp={stopPainting}
-                onMouseMove={draw}
+                onMouseDown={handleMouseDown}
+                onMouseUp={handleMouseUp}
+                onMouseMove={handleMouseMovement}
                 style={{
-                    cursor: isEraserSelected ? "url()" : "default",
+                    cursor: isEraserSelected
+                        ? `url("/eraser.svg"), default`
+                        : "default",
                 }}
             ></canvas>
         </>
