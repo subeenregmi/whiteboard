@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import WhiteboardWS from "@/utils/ws";
 import { Stroke } from "@/models/stroke";
 import {
@@ -23,11 +23,15 @@ export default function Whiteboard() {
 
     let painting = false;
 
-    const pen: Pen = {
+    const [strokes, setStrokes] = useState<Stroke[]>([]);
+
+    const [pen, setPen] = useState<Pen>({
         color: DEFAULT_COLOR,
         thickness: DEFAULT_THICKNESS,
         style: DEFAULT_STYLE,
-    };
+    });
+
+    const [isEraserSelected, setEraserSelected] = useState<boolean>(false);
 
     const currentStroke: Stroke = {
         id: Date.now(),
@@ -36,6 +40,7 @@ export default function Whiteboard() {
         pen: pen,
     };
 
+    // Initial rendering of whiteboard
     useEffect(() => {
         const canvas = canvasRef.current;
         const context = canvas?.getContext("2d");
@@ -45,14 +50,43 @@ export default function Whiteboard() {
         canvas!.style.height = `${window.innerHeight}px`;
         canvas!.style.width = `${window.innerWidth}px`;
 
-        context!.strokeStyle = pen.color;
-        context!.lineWidth = pen.thickness;
-        context!.lineCap = pen.style;
+        context!.strokeStyle = DEFAULT_COLOR;
+        context!.lineWidth = DEFAULT_THICKNESS;
+        context!.lineCap = DEFAULT_STYLE;
 
         contextRef.current = context!;
 
-        ws.handleIncomingStroke(contextRef);
-    }, [pen.color, pen.thickness, pen.style]);
+        ws.handleIncomingStroke((s: Stroke) => {
+            setStrokes((prev) => [...prev, s]);
+        });
+    }, []);
+
+    // Re-draw entire whiteboard when strokes changes
+    useEffect(() => {
+        const context = contextRef.current;
+        for (const stroke of strokes) {
+            context!.strokeStyle = stroke.pen.color;
+            context!.lineWidth = stroke.pen.thickness;
+
+            context?.beginPath();
+
+            const c = stroke.coordinates?.[0];
+
+            if (stroke.coordinates.length == 0) {
+                // Do nothing
+            } else if (stroke.coordinates.length == 1) {
+                context?.moveTo(c[0], c[1]);
+                context?.fillRect(c[0], c[1], 1, 1);
+            } else {
+                const c = stroke.coordinates[0];
+                context?.moveTo(c[0], c[1]);
+                stroke.coordinates.forEach((x) => {
+                    context?.lineTo(x[0], x[1]);
+                });
+            }
+            context?.stroke();
+        }
+    }, [strokes]);
 
     function updatePos(event: React.MouseEvent) {
         const x = event.clientX * SCALE_FACTOR;
@@ -71,6 +105,9 @@ export default function Whiteboard() {
         currentStroke.timestamp = Date.now();
 
         ws.sendStroke(currentStroke);
+        setStrokes([...strokes, currentStroke]);
+
+        console.log(strokes);
 
         currentStroke.coordinates = [];
 
@@ -99,10 +136,16 @@ export default function Whiteboard() {
 
     function changePenColor(event: React.ChangeEvent<HTMLInputElement>) {
         pen.color = event.target.value;
+        setPen(pen);
     }
 
     function changePenThickness(event: React.ChangeEvent<HTMLInputElement>) {
         pen.thickness = Number(event.target.value);
+        setPen(pen);
+    }
+
+    function changeEraserSelected(event: React.ChangeEvent<HTMLInputElement>) {
+        setEraserSelected(event.target.checked);
     }
 
     return (
@@ -110,6 +153,8 @@ export default function Whiteboard() {
             <Toolbar
                 penColorChanger={changePenColor}
                 penThicknessChanger={changePenThickness}
+                eraserSelected={isEraserSelected}
+                changeEraserSelected={changeEraserSelected}
             />
             <canvas
                 ref={canvasRef}
@@ -117,6 +162,9 @@ export default function Whiteboard() {
                 onMouseDown={startPainting}
                 onMouseUp={stopPainting}
                 onMouseMove={draw}
+                style={{
+                    cursor: isEraserSelected ? "url()" : "default",
+                }}
             ></canvas>
         </>
     );

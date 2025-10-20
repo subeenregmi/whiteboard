@@ -4,6 +4,9 @@ import { ChangeEventHandler } from "react";
 export interface ToolbarProps {
     penColorChanger: ChangeEventHandler<HTMLInputElement>;
     penThicknessChanger: ChangeEventHandler<HTMLInputElement>;
+
+    changeEraserSelected: ChangeEventHandler<HTMLInputElement>;
+    eraserSelected: boolean;
 }
 
 export default function Toolbar(props: ToolbarProps) {
@@ -17,6 +20,14 @@ export default function Toolbar(props: ToolbarProps) {
                 max={MAX_STROKE_WIDTH}
                 onChange={props.penThicknessChanger}
             />
+
+            <input
+                type="checkbox"
+                id="eraser"
+                onChange={props.changeEraserSelected}
+                checked={props.eraserSelected}
+            />
+            <label htmlFor="eraser">Eraser</label>
         </div>
     );
 }
