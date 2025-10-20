@@ -7,6 +7,7 @@
     python313Packages.pip
     python313Packages.virtualenv
     nodejs_24
+    zsh
   ]);
 
   runScript = "zsh";
