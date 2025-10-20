@@ -1,4 +1,3 @@
-import { Dispatch, SetStateAction } from "react";
 import { Stroke } from "../models/stroke";
 
 export default class WhiteboardWS {
@@ -27,6 +26,14 @@ export default class WhiteboardWS {
     }
 
     public sendStroke(s: Stroke) {
-        this.ws.send(JSON.stringify(s));
+        this.ws.send(
+            JSON.stringify(s, (key, value) => {
+                if (key == "highlighted") {
+                    return undefined;
+                }
+
+                return value;
+            }),
+        );
     }
 }

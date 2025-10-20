@@ -8,4 +8,5 @@ export interface Stroke {
     timestamp?: Timestamp;
     coordinates: Position[];
     pen: Pen;
+    highlighted?: boolean;
 }
