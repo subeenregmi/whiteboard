@@ -13,3 +13,5 @@ down:
 flush-cache:
 	@docker exec -it whiteboard-redis redis-cli FLUSHALL
 
+attach-redis:
+	@docker exec -it whiteboard-redis redis-cli

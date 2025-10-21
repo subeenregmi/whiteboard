@@ -1,18 +1,21 @@
 from typing import Dict
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
-from models.stroke import Stroke
-from pydantic import ValidationError
+from models.constants import Action
+from models.data import Data, StrokeData
+from pydantic import TypeAdapter, ValidationError
 from ws.ws import ConnectionManager
 from rs.rs import StrokeStore
-import json
 import logging
 
 app = FastAPI(debug=True)
 managers: Dict[int, ConnectionManager] = {}
-stroke_store = StrokeStore()
 
 logger = logging.getLogger(__name__)
+
+stroke_store = StrokeStore(logger)
+
+data_type_adapter: TypeAdapter[Data] = TypeAdapter(Data)
 
 
 # could use query parameters to implement password to join boards
@@ -25,27 +28,26 @@ async def websocket_endpoint(websocket: WebSocket, board_id: int):
     await manager.connect(websocket)
 
     # to load in all previous strokes
-    strokes = await stroke_store.load_stroke_history(board_id)
-    sorted_strokes = []
+    strokes = stroke_store.load_strokes(board_id)
 
     for stroke in strokes:
-        try:
-            s = Stroke.model_validate(json.loads(stroke))
-            sorted_strokes.append(s)
-        except ValidationError as e:
-            logger.error(e)
-
-    sorted_strokes.sort(key=lambda x: x.timestamp)
-    for stroke in sorted_strokes:
-        await websocket.send_text(stroke.model_dump_json())
+        data = StrokeData(Action=Action.Stroke, Data=stroke)
+        await websocket.send_text(data.model_dump_json())
 
     try:
         while True:
             data = await websocket.receive_json()
             try:
-                stroke = Stroke.model_validate(data)
-                await stroke_store.save_stroke(board_id, stroke)
-                await manager.broadcast_board_data(websocket, stroke)
+                validated_data = data_type_adapter.validate_python(data)
+
+                match validated_data.Action:
+                    case Action.Stroke:
+                        stroke_store.save_stroke(board_id, validated_data.Data)
+                        await manager.broadcast_data(websocket, validated_data)
+
+                    case Action.Erase:
+                        stroke_store.erase_strokes(board_id, validated_data.Data)
+                        await manager.broadcast_data(websocket, validated_data)
 
             except ValidationError as e:
                 print(e)

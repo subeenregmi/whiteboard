@@ -5,7 +5,7 @@ type Position = tuple[int, int]
 
 class Action(IntEnum):
     Stroke = 1
-    MouseMove = 2
+    Erase = 2
 
 
 class LineCap(Enum):

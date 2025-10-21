@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import WhiteboardWS from "@/utils/ws";
 import { Stroke } from "@/models/stroke";
+import { Erase } from "@/models/erase";
 import {
     DEFAULT_COLOR,
     DEFAULT_STYLE,
@@ -56,9 +57,18 @@ export default function Whiteboard() {
 
         contextRef.current = context!;
 
-        ws.handleIncomingStroke((s: Stroke) => {
-            setStrokes((prev) => [...prev, s]);
-        });
+        ws.handleIncomingData(
+            (s: Stroke) => {
+                setStrokes((prev) => [...prev, s]);
+            },
+            (e: Erase) => {
+                setStrokes((prev) =>
+                    prev.filter((s: Stroke) => {
+                        return !e.ids.includes(s.id);
+                    }),
+                );
+            },
+        );
     }, []);
 
     // Re-draw entire whiteboard when strokes changes
@@ -90,7 +100,6 @@ export default function Whiteboard() {
                     context?.lineTo(x[0], x[1]);
                 });
             }
-            console.log("Stroked!");
             context?.stroke();
         }
     }, [strokes]);
@@ -116,8 +125,15 @@ export default function Whiteboard() {
     }
 
     function stopErasing() {
-        const deletedStrokes = strokes.filter((s: Stroke) => s.highlighted);
-        setStrokes(deletedStrokes);
+        const erased: Erase = {
+            ids: strokes
+                .filter((s: Stroke) => s.highlighted)
+                .map((s: Stroke) => s.id),
+        };
+
+        ws.sendErase(erased);
+
+        setStrokes(strokes.filter((s: Stroke) => !s.highlighted));
     }
 
     function handleDraw(event: React.MouseEvent) {
@@ -151,25 +167,20 @@ export default function Whiteboard() {
 
         let changed = false;
 
-        console.log("Strokes", strokes);
         for (let i = 0; i < strokes.length; i++) {
-            let smallestDist = 99999;
             for (const coord of strokes[i].coordinates) {
                 const dist = Math.sqrt(
                     Math.pow(coord[0] - x, 2) + Math.pow(coord[1] - y, 2),
                 );
-                if (dist < smallestDist) smallestDist = dist;
 
                 if (
                     dist < 10 + strokes[i].pen.thickness / 2 &&
                     !strokes[i].highlighted
                 ) {
                     changed = true;
-                    console.log("matched");
                     strokes[i].highlighted = true;
                 }
             }
-            //console.log("smallestDist", smallestDist);
             newStrokes.push(strokes[i]);
         }
 
@@ -177,14 +188,11 @@ export default function Whiteboard() {
     }
 
     function handleMouseDown(event: React.MouseEvent) {
-        // console.log("Mouse down!");
         updatePos(event);
         mouseDown.current = true;
     }
 
     function handleMouseUp() {
-        // console.log("Mouse up!");
-
         mouseDown.current = false;
         if (eraserSelected) {
             stopErasing();
@@ -194,7 +202,7 @@ export default function Whiteboard() {
     }
 
     function handleMouseMovement(event: React.MouseEvent) {
-        // console.log("Moving mouse!");
+        console.log(strokes.length);
         if (!mouseDown.current) return;
 
         if (eraserSelected) {
