@@ -10,5 +10,5 @@ export type Position = [number, number];
 
 export enum Action {
     Stroke = 1,
-    MouseMove = 2,
+    Erase = 2,
 }

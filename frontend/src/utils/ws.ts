@@ -1,4 +1,7 @@
 import { Stroke } from "../models/stroke";
+import { Data, EraseData, StrokeData } from "@/models/data";
+import { Erase } from "@/models/erase";
+import { Action } from "@/models/constants";
 
 export default class WhiteboardWS {
     private uri: string;
@@ -18,38 +21,50 @@ export default class WhiteboardWS {
         };
     }
 
-    public handleIncomingStroke(
-        contextRef: React.RefObject<CanvasRenderingContext2D | null>,
+    public handleIncomingData(
+        addStroke: (s: Stroke) => void,
+        eraseStrokes: (e: Erase) => void,
     ) {
         this.ws.onmessage = (event) => {
-            const stroke: Stroke = JSON.parse(event.data);
-            const context = contextRef.current;
+            const data: Data = JSON.parse(event.data);
 
-            context!.strokeStyle = stroke.pen.color;
-            context!.lineWidth = stroke.pen.thickness;
-
-            context?.beginPath();
-
-            const c = stroke.coordinates?.[0];
-
-            if (stroke.coordinates.length == 0) {
-                // Do nothing
-            } else if (stroke.coordinates.length == 1) {
-                context?.moveTo(c[0], c[1]);
-                context?.fillRect(c[0], c[1], 1, 1);
-            } else {
-                const c = stroke.coordinates[0];
-                context?.moveTo(c[0], c[1]);
-                stroke.coordinates.forEach((x) => {
-                    context?.lineTo(x[0], x[1]);
-                });
+            switch (data.Action) {
+                case Action.Stroke:
+                    addStroke(data.Data);
+                    break;
+                case Action.Erase:
+                    eraseStrokes(data.Data);
+                    break;
+                default:
+                    console.log("Unknown data action");
+                    break;
             }
-            context?.stroke();
         };
     }
 
     public sendStroke(s: Stroke) {
-        this.ws.send(JSON.stringify(s));
+        const data: StrokeData = {
+            Action: Action.Stroke,
+            Data: s,
+        };
+
+        this.ws.send(
+            JSON.stringify(data, (key, value) => {
+                if (key == "highlighted") {
+                    return undefined;
+                }
+
+                return value;
+            }),
+        );
+    }
+
+    public sendErase(e: Erase) {
+        const data: EraseData = {
+            Action: Action.Erase,
+            Data: e,
+        };
+
+        this.ws.send(JSON.stringify(data));
     }
 }
-
