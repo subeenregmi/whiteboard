@@ -1,3 +1,3 @@
 export interface Erase {
-    ids: number[];
+  ids: number[];
 }

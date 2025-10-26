@@ -1,12 +1,13 @@
+import logging
 from typing import Dict
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from pydantic import TypeAdapter, ValidationError
+
 from models.constants import Action
 from models.data import Data, StrokeData
-from pydantic import TypeAdapter, ValidationError
-from ws.ws import ConnectionManager
 from rs.rs import StrokeStore
-import logging
+from ws.ws import ConnectionManager
 
 app = FastAPI(debug=True)
 managers: Dict[int, ConnectionManager] = {}
@@ -47,6 +48,9 @@ async def websocket_endpoint(websocket: WebSocket, board_id: int):
 
                     case Action.Erase:
                         stroke_store.erase_strokes(board_id, validated_data.Data)
+                        await manager.broadcast_data(websocket, validated_data)
+
+                    case Action.CursorMove:
                         await manager.broadcast_data(websocket, validated_data)
 
             except ValidationError as e:

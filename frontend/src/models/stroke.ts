@@ -3,10 +3,10 @@ import { Pen } from "./pen";
 import { Position } from "./constants";
 
 export interface Stroke {
-    id: number;
-    uname: string;
-    timestamp?: Timestamp;
-    coordinates: Position[];
-    pen: Pen;
-    highlighted?: boolean;
+  id: number;
+  uname: string;
+  timestamp?: Timestamp;
+  coordinates: Position[];
+  pen: Pen;
+  highlighted?: boolean;
 }

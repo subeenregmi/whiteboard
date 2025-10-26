@@ -1,5 +1,5 @@
 export interface Pen {
-    color: string;
-    thickness: number;
-    style: CanvasLineCap;
+  color: string;
+  thickness: number;
+  style: CanvasLineCap;
 }

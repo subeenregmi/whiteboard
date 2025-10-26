@@ -1,8 +1,11 @@
 from typing import Annotated, Literal
+
 from pydantic import BaseModel, Field
+
 from models.constants import Action
-from models.stroke import Stroke
+from models.cursor import Cursor
 from models.erase import Erase
+from models.stroke import Stroke
 
 
 class StrokeData(BaseModel):
@@ -15,4 +18,11 @@ class EraseData(BaseModel):
     Data: Erase
 
 
-type Data = Annotated[StrokeData | EraseData, Field(discriminator="Action")]
+class CursorData(BaseModel):
+    Action: Literal[Action.CursorMove]
+    Data: Cursor
+
+
+type Data = Annotated[
+    StrokeData | EraseData | CursorData, Field(discriminator="Action")
+]
