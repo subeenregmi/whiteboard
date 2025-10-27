@@ -9,6 +9,6 @@ export const DEFAULT_STYLE = "round";
 export type Position = [number, number];
 
 export enum Action {
-    Stroke = 1,
-    Erase = 2,
+  Stroke = 1,
+  Erase = 2,
 }
