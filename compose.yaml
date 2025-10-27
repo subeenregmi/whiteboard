@@ -25,6 +25,15 @@ services:
     restart: always
     ports:
       - "6379:6379"
+
+  postgres:
+    image: postgres
+    container_name: whiteboard-postgres
+    shm_size: 128mb
+    volumes: 
+      - ./data/postgres:/var/lib/postgresql
+    environment:
+      POSTGRES_PASSWORD: example
   
   frontend:
     container_name: whiteboard-frontend
