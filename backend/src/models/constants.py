@@ -1,6 +1,6 @@
 from enum import Enum, IntEnum
 
-type Position = tuple[int, int]
+type Position = tuple[float, float]
 
 
 class Action(IntEnum):
