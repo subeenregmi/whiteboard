@@ -88,9 +88,9 @@ export default function Whiteboard() {
 
       const c = stroke.coordinates?.[0]
 
-      if (stroke.coordinates.length == 0) {
+      if (stroke.coordinates.length === 0) {
         // Do nothing
-      } else if (stroke.coordinates.length == 1) {
+      } else if (stroke.coordinates.length === 1) {
         context?.moveTo(c[0], c[1])
         context?.fillRect(c[0], c[1], 1, 1)
       } else {
@@ -105,10 +105,10 @@ export default function Whiteboard() {
   }, [strokes])
 
   function updatePos(event: React.MouseEvent) {
-    const x = event.clientX * SCALE_FACTOR
-
-    // hack to handle the displacement the top toolbar causes
-    const y = event.clientY * SCALE_FACTOR - 48
+    const canvas = canvasRef.current
+    const rect = canvas!.getBoundingClientRect()
+    const x = (event.clientX - rect.left) * SCALE_FACTOR
+    const y = (event.clientY - rect.top) * SCALE_FACTOR
     currentPosition.current = [x, y]
   }
 
@@ -137,10 +137,10 @@ export default function Whiteboard() {
   }
 
   function handleDraw(event: React.MouseEvent) {
-    const x = event.clientX * SCALE_FACTOR
-
-    // hack to handle the displacement the top toolbar causes
-    const y = event.clientY * SCALE_FACTOR - 48
+    const canvas = canvasRef.current
+    const rect = canvas!.getBoundingClientRect()
+    const x = (event.clientX - rect.left) * SCALE_FACTOR
+    const y = (event.clientY - rect.top) * SCALE_FACTOR
 
     contextRef.current!.strokeStyle = pen.color
     contextRef.current!.lineWidth = pen.thickness
@@ -158,10 +158,10 @@ export default function Whiteboard() {
   }
 
   function handleErasing(event: React.MouseEvent) {
-    const x = event.clientX * SCALE_FACTOR
-
-    // hack to handle the displacement the top toolbar causes
-    const y = event.clientY * SCALE_FACTOR - 48
+    const canvas = canvasRef.current
+    const rect = canvas!.getBoundingClientRect()
+    const x = (event.clientX - rect.left) * SCALE_FACTOR
+    const y = (event.clientY - rect.top) * SCALE_FACTOR
 
     const newStrokes: Stroke[] = []
 
@@ -212,27 +212,31 @@ export default function Whiteboard() {
     }
   }
 
-  function changePenColor(event: React.ChangeEvent<HTMLInputElement>) {
-    pen.color = event.target.value
-    setPen(pen)
+  function changePenColor(color: string) {
+    setPen({ ...pen, color })
   }
 
   function changePenThickness(event: React.ChangeEvent<HTMLInputElement>) {
-    pen.thickness = Number(event.target.value)
-    setPen(pen)
+    setPen({ ...pen, thickness: Number(event.target.value) })
   }
 
-  function changeEraserSelected(event: React.ChangeEvent<HTMLInputElement>) {
-    setEraserSelected(event.target.checked)
+  function selectEraser() {
+    setEraserSelected(true)
+  }
+
+  function selectPen() {
+    setEraserSelected(false)
   }
 
   return (
     <div className="relative">
       <Toolbar
-        penColorChanger={changePenColor}
         penThicknessChanger={changePenThickness}
+        onColorSelect={changePenColor}
+        selectedColor={pen.color}
         eraserSelected={eraserSelected}
-        changeEraserSelected={changeEraserSelected}
+        onEraserSelect={selectEraser}
+        onPenSelect={selectPen}
       />
       <canvas
         ref={canvasRef}

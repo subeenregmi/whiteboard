@@ -26,12 +26,10 @@
           python313
           poetry
           nodejs_24
-          zsh
         ];
 
         shellHook = ''
           export LD_LIBRARY_PATH=$NIX_LD_LIBRARY_PATH
-          zsh
         '';
       };
     };
