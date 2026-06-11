@@ -1,18 +1,20 @@
 from typing import Annotated, Literal
+
 from pydantic import BaseModel, Field
+
 from models.constants import Action
-from models.stroke import Stroke
 from models.erase import Erase
+from models.stroke import Stroke
 
 
 class StrokeData(BaseModel):
-    Action: Literal[Action.Stroke]
-    Data: Stroke
+    action: Literal[Action.Stroke]
+    data: Stroke
 
 
 class EraseData(BaseModel):
-    Action: Literal[Action.Erase]
-    Data: Erase
+    action: Literal[Action.Erase]
+    data: Erase
 
 
-type Data = Annotated[StrokeData | EraseData, Field(discriminator="Action")]
+type Data = Annotated[StrokeData | EraseData, Field(discriminator="action")]

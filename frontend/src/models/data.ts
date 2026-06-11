@@ -1,15 +1,20 @@
-import { Action } from "./constants";
-import { Erase } from "./erase";
-import { Stroke } from "./stroke";
+import type { Action } from "./constants";
+import type { Erase } from "./erase";
+import type { Stroke } from "./stroke";
 
-export interface StrokeData {
-    Action: Action.Stroke;
-    Data: Stroke;
-}
+export type ActionDataMap = {
+	[Action.Stroke]: Stroke;
+	[Action.Erase]: Erase;
+};
 
-export interface EraseData {
-    Action: Action.Erase;
-    Data: Erase;
-}
+export type Data = {
+	[A in Action]: { action: A; data: ActionDataMap[A] };
+}[Action];
 
-export type Data = StrokeData | EraseData;
+export type DataHandler = {
+	[A in Action]: { action: A; handler: (d: ActionDataMap[A]) => void };
+}[Action];
+
+export type DataHandlerMap = {
+	[A in Action]: (d: ActionDataMap[A]) => void;
+};

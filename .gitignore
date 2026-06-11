@@ -337,3 +337,5 @@ web/.yarn/*
 .DS_Store
 
 *.rdb
+
+.direnv/

@@ -1,11 +1,13 @@
-from logging import Logger
-from typing import Set
-from pydantic import ValidationError
-import redis
-from models.stroke import Stroke
-from models.erase import Erase
 import json
 import os
+from logging import Logger
+from typing import Set
+
+import redis
+from pydantic import ValidationError
+
+from models.erase import Erase
+from models.stroke import Stroke
 
 HOST = os.getenv("REDIS_HOST", "localhost")
 PORT = int(os.getenv("REDIS_PORT", 6379))
@@ -40,7 +42,5 @@ class StrokeStore:
                 sorted_strokes.append(s)
             except ValidationError as e:
                 self.logger.error(e)
-
-        sorted_strokes.sort(key=lambda x: x.timestamp)
 
         return sorted_strokes

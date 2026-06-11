@@ -1,12 +1,10 @@
-from datetime import datetime
+from pydantic import BaseModel
+
 from models.constants import Position
 from models.pen import Pen
-from pydantic import BaseModel
 
 
 class Stroke(BaseModel):
-    id: int
-    uname: str
-    timestamp: datetime
+    id: str
     coordinates: list[Position]
     pen: Pen
