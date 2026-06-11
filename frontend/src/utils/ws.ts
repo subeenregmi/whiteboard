@@ -1,70 +1,36 @@
-import { Stroke } from "../models/stroke";
-import { Data, EraseData, StrokeData } from "@/models/data";
-import { Erase } from "@/models/erase";
 import { Action } from "@/models/constants";
+import type { DataHandler, DataHandlerMap } from "@/models/data";
 
 export default class WhiteboardWS {
-    private uri: string;
-    private ws: WebSocket;
+	private uri: string;
+	private ws: WebSocket;
+	private handlers: DataHandlerMap;
 
-    public constructor() {
-        this.uri = "ws://localhost:8000/ws/1";
+	public constructor() {
+		this.uri = "ws://localhost:8000/ws/1";
+		this.ws = new WebSocket(this.uri);
+		this.handlers = {
+			[Action.Stroke]: () => {},
+			[Action.Erase]: () => {},
+		};
 
-        this.ws = new WebSocket(this.uri);
+		this.ws.onopen = () => {
+			console.log("Websocket connected!");
+		};
 
-        this.ws.onopen = () => {
-            console.log("Websocket connected!");
-        };
+		this.ws.close = () => {
+			console.log("Websocket closed!");
+		};
+	}
 
-        this.ws.close = () => {
-            console.log("Websocket closed!");
-        };
-    }
-
-    public handleIncomingData(
-        addStroke: (s: Stroke) => void,
-        eraseStrokes: (e: Erase) => void,
-    ) {
-        this.ws.onmessage = (event) => {
-            const data: Data = JSON.parse(event.data);
-
-            switch (data.Action) {
-                case Action.Stroke:
-                    addStroke(data.Data);
-                    break;
-                case Action.Erase:
-                    eraseStrokes(data.Data);
-                    break;
-                default:
-                    console.log("Unknown data action");
-                    break;
-            }
-        };
-    }
-
-    public sendStroke(s: Stroke) {
-        const data: StrokeData = {
-            Action: Action.Stroke,
-            Data: s,
-        };
-
-        this.ws.send(
-            JSON.stringify(data, (key, value) => {
-                if (key == "highlighted") {
-                    return undefined;
-                }
-
-                return value;
-            }),
-        );
-    }
-
-    public sendErase(e: Erase) {
-        const data: EraseData = {
-            Action: Action.Erase,
-            Data: e,
-        };
-
-        this.ws.send(JSON.stringify(data));
-    }
+	public registerHandler(handler: DataHandler) {
+		switch (handler.action) {
+			case Action.Stroke:
+				this.handlers[Action.Stroke] = handler.handler;
+				break;
+			case Action.Erase:
+				this.handlers[Action.Erase] = handler.handler;
+				break;
+		}
+	}
 }

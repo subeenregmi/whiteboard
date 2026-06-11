@@ -1,12 +1,10 @@
-import { Timestamp } from "next/dist/server/lib/cache-handlers/types";
-import { Pen } from "./pen";
-import { Position } from "./constants";
+import type { Timestamp } from "next/dist/server/lib/cache-handlers/types";
+import type { Position } from "./constants";
+import type { Pen } from "./pen";
 
 export interface Stroke {
-    id: number;
-    uname: string;
-    timestamp?: Timestamp;
-    coordinates: Position[];
-    pen: Pen;
-    highlighted?: boolean;
+	id: number;
+	timestamp?: Timestamp;
+	coordinates: Position[];
+	pen: Pen;
 }
