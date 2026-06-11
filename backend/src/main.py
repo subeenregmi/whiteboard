@@ -1,12 +1,13 @@
+import logging
 from typing import Dict
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from pydantic import TypeAdapter, ValidationError
+
 from models.constants import Action
 from models.data import Data, StrokeData
-from pydantic import TypeAdapter, ValidationError
-from ws.ws import ConnectionManager
 from rs.rs import StrokeStore
-import logging
+from ws.ws import ConnectionManager
 
 app = FastAPI(debug=True)
 managers: Dict[int, ConnectionManager] = {}
@@ -31,26 +32,27 @@ async def websocket_endpoint(websocket: WebSocket, board_id: int):
     strokes = stroke_store.load_strokes(board_id)
 
     for stroke in strokes:
-        data = StrokeData(Action=Action.Stroke, Data=stroke)
+        data = StrokeData(action=Action.Stroke, data=stroke)
         await websocket.send_text(data.model_dump_json())
 
     try:
         while True:
             data = await websocket.receive_json()
+            logger.warning("this data %s", data)
             try:
                 validated_data = data_type_adapter.validate_python(data)
 
-                match validated_data.Action:
+                match validated_data.action:
                     case Action.Stroke:
-                        stroke_store.save_stroke(board_id, validated_data.Data)
+                        stroke_store.save_stroke(board_id, validated_data.data)
                         await manager.broadcast_data(websocket, validated_data)
 
                     case Action.Erase:
-                        stroke_store.erase_strokes(board_id, validated_data.Data)
+                        stroke_store.erase_strokes(board_id, validated_data.data)
                         await manager.broadcast_data(websocket, validated_data)
 
             except ValidationError as e:
-                print(e)
+                logger.warning("failed to format data")
                 await websocket.send_text("Invalid format")
 
     except WebSocketDisconnect:

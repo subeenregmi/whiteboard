@@ -3,6 +3,8 @@ export const MIN_STROKE_WIDTH: number = 1;
 export const MAX_STROKE_WIDTH: number = 100;
 
 export const DEFAULT_STYLE = "round";
+export const DEFAULT_LINE_CAP: CanvasLineCap = "round";
+export const DEFAULT_LINE_JOIN: CanvasLineJoin = "round";
 
 export type Position = [number, number];
 

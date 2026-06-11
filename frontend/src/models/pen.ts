@@ -1,5 +1,6 @@
+import type { Color, Thickness } from "./constants";
+
 export interface Pen {
-    color: string;
-    thickness: number;
-    style: CanvasLineCap;
+	color: Color;
+	thickness: Thickness;
 }

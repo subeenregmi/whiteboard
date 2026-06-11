@@ -1,5 +1,5 @@
 import { Action } from "@/models/constants";
-import type { DataHandler, DataHandlerMap } from "@/models/data";
+import type { Data, DataHandler, DataHandlerMap } from "@/models/data";
 
 export default class WhiteboardWS {
 	private uri: string;
@@ -7,6 +7,7 @@ export default class WhiteboardWS {
 	private handlers: DataHandlerMap;
 
 	public constructor() {
+		// TODO: move to env var
 		this.uri = "ws://localhost:8000/ws/1";
 		this.ws = new WebSocket(this.uri);
 		this.handlers = {
@@ -18,9 +19,11 @@ export default class WhiteboardWS {
 			console.log("Websocket connected!");
 		};
 
-		this.ws.close = () => {
+		this.ws.onclose = () => {
 			console.log("Websocket closed!");
 		};
+
+		this.ws.onmessage = (ev) => this.handleIncomingData(ev);
 	}
 
 	public registerHandler(handler: DataHandler) {
@@ -30,6 +33,31 @@ export default class WhiteboardWS {
 				break;
 			case Action.Erase:
 				this.handlers[Action.Erase] = handler.handler;
+				break;
+		}
+	}
+
+	public sendData(data: Data) {
+		console.log("Sending data", data);
+		this.ws.send(JSON.stringify(data));
+	}
+
+	public handleIncomingData(ev: MessageEvent) {
+		let data: Data;
+		console.log("got new data");
+		try {
+			data = JSON.parse(ev.data);
+		} catch {
+			console.error("failed to parse incoming ws data:", ev.data);
+			return;
+		}
+
+		switch (data.action) {
+			case Action.Stroke:
+				this.handlers[Action.Stroke](data.data);
+				break;
+			case Action.Erase:
+				this.handlers[Action.Erase](data.data);
 				break;
 		}
 	}

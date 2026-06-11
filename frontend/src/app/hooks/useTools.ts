@@ -1,12 +1,13 @@
 import { useRef, useState } from "react";
+import type { Data } from "@/models/data";
 import { Eraser } from "@/tools/eraser";
 import { Hand } from "@/tools/hand";
 import { Pen } from "@/tools/pen";
 import { newTools, type Tools } from "@/tools/registry";
 import type { Tool } from "@/tools/tool";
 
-export default function useTools() {
-	const tools = useRef<Tools>(newTools());
+export default function useTools(sendData: (d: Data) => void) {
+	const tools = useRef<Tools>(newTools(sendData));
 
 	const [tool, setToolState] = useState<Tool>(tools.current.hand);
 

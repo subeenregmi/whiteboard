@@ -1,11 +1,15 @@
+import { v4 } from "uuid";
 import type { IconVariant } from "@/app/ui/components/icon";
 import PenSubMenu from "@/app/ui/components/toolbar/pen";
 import type { Color, Position, Thickness } from "@/models/constants";
-import { Colors, ThicknessValues } from "@/models/constants";
+import {
+	Colors,
+	DEFAULT_LINE_CAP,
+	DEFAULT_LINE_JOIN,
+	ThicknessValues,
+} from "@/models/constants";
+import type { Stroke } from "@/models/stroke";
 import { Tool } from "./tool";
-
-const DEFAULT_LINE_CAP: CanvasLineCap = "round";
-const DEFAULT_LINE_JOIN: CanvasLineJoin = "round";
 
 export class Pen extends Tool {
 	public color: Color;
@@ -14,17 +18,19 @@ export class Pen extends Tool {
 	public icon: IconVariant = "pen";
 	public menu = () => <PenSubMenu pen={this} />;
 	public cursorIcon: IconVariant = "pen";
+	public send: (s: Stroke) => void;
 
 	private data: Position[];
 	private isDrawingFrame: boolean;
 
-	constructor() {
+	constructor(send: (s: Stroke) => void) {
 		super();
 		this.color = "black";
 		this.thickness = "md";
 		this.drawing = false;
 		this.data = [];
 		this.isDrawingFrame = false;
+		this.send = send;
 	}
 
 	handleMouseMove(ctx: CanvasRenderingContext2D, p: Position) {
@@ -67,6 +73,17 @@ export class Pen extends Tool {
 	handleMouseUp(_ctx: CanvasRenderingContext2D, _p: Position): void {
 		this.drawing = false;
 
-		const _s = (this.data = []);
+		const s: Stroke = {
+			id: v4(),
+			pen: {
+				color: this.color,
+				thickness: this.thickness,
+			},
+			coordinates: this.data,
+		};
+
+		this.send(s);
+
+		this.data = [];
 	}
 }
