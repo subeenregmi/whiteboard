@@ -2,7 +2,7 @@ import { useState } from "react";
 import { ToolNames, type Tools } from "@/tools/registry";
 import type { Tool } from "@/tools/tool";
 import cn from "@/utils/cn";
-import Icon, { type IconVariant } from "../icon";
+import Icon, { type IconVariant } from "../icons";
 
 export default function Toolbar(props: {
 	setTool: (tool: Tool) => void;
@@ -20,6 +20,7 @@ export default function Toolbar(props: {
 			<div className={"flex justify-around gap-3"}>
 				{ToolNames.map((toolName) => (
 					<button
+						type="button"
 						key={toolName}
 						onClick={() => {
 							const tool = props.tools[toolName];

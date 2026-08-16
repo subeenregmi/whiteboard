@@ -1,5 +1,4 @@
 import logging
-from typing import Dict
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from pydantic import TypeAdapter, ValidationError
@@ -10,7 +9,7 @@ from rs.rs import StrokeStore
 from ws.ws import ConnectionManager
 
 app = FastAPI(debug=True)
-managers: Dict[int, ConnectionManager] = {}
+managers: dict[int, ConnectionManager] = {}
 
 logger = logging.getLogger(__name__)
 
@@ -51,7 +50,7 @@ async def websocket_endpoint(websocket: WebSocket, board_id: int):
                         stroke_store.erase_strokes(board_id, validated_data.data)
                         await manager.broadcast_data(websocket, validated_data)
 
-            except ValidationError as e:
+            except ValidationError:
                 logger.warning("failed to format data")
                 await websocket.send_text("Invalid format")
 

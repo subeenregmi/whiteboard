@@ -6,7 +6,7 @@ import {
 } from "@/models/constants";
 import type { Pen } from "@/tools/pen";
 import cn from "@/utils/cn";
-import Icon from "../icon";
+import Icon from "../icons";
 
 export default function PenSubMenu(props: { pen: Pen }) {
 	const [colorState, setColorState] = useState<Color>("black");
@@ -25,9 +25,13 @@ export default function PenSubMenu(props: { pen: Pen }) {
 
 	return (
 		<>
-			{thicknesses.map((thickness, i) => {
+			{thicknesses.map((thickness) => {
 				return (
-					<button key={i} onClick={() => setPenThickness(thickness)}>
+					<button
+						type="button"
+						key={thickness}
+						onClick={() => setPenThickness(thickness)}
+					>
 						<Icon
 							className={cn(
 								thicknessState === thickness ? "border-b-2" : "border-b-0",
@@ -42,9 +46,9 @@ export default function PenSubMenu(props: { pen: Pen }) {
 				);
 			})}
 
-			{colors.map((color, i) => {
+			{colors.map((color) => {
 				return (
-					<button onClick={() => setPenColor(color)} key={i}>
+					<button type="button" onClick={() => setPenColor(color)} key={color}>
 						<Icon
 							className={colorState === color ? "border-b-2" : "border-b-0"}
 							variant="square"

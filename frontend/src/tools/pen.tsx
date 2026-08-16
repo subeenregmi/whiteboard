@@ -1,5 +1,5 @@
 import { v4 } from "uuid";
-import type { IconVariant } from "@/app/ui/components/icon";
+import type { IconVariant } from "@/app/ui/components/icons";
 import PenSubMenu from "@/app/ui/components/toolbar/pen";
 import type { Color, Position, Thickness } from "@/models/constants";
 import {

@@ -1,0 +1,36 @@
+# Install with: pre-commit install
+# Run manually against everything: pre-commit run --all-files
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-merge-conflict
+      - id: check-added-large-files
+      - id: check-toml
+      - id: check-yaml
+
+  # Both hooks shell out to the same targets CI runs, so there is a single
+  # source of truth for what "passing" means.
+  - repo: local
+    hooks:
+      - id: backend
+        name: backend (ruff + pyright)
+        entry: make -C backend check
+        language: system
+        pass_filenames: false
+        files: ^backend/.*\.py$
+
+      - id: frontend-biome
+        name: frontend (biome)
+        entry: npm --prefix frontend run check
+        language: system
+        pass_filenames: false
+        files: ^frontend/.*\.(ts|tsx|js|jsx|mjs|css|json)$
+
+      - id: frontend-typecheck
+        name: frontend (tsc)
+        entry: npm --prefix frontend run typecheck
+        language: system
+        pass_filenames: false
+        files: ^frontend/.*\.(ts|tsx)$

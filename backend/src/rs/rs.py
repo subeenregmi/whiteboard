@@ -1,7 +1,6 @@
 import json
 import os
 from logging import Logger
-from typing import Set
 
 import redis
 from pydantic import ValidationError
@@ -10,7 +9,7 @@ from models.erase import Erase
 from models.stroke import Stroke
 
 HOST = os.getenv("REDIS_HOST", "localhost")
-PORT = int(os.getenv("REDIS_PORT", 6379))
+PORT = int(os.getenv("REDIS_PORT", "6379"))
 
 
 class StrokeStore:
@@ -30,7 +29,7 @@ class StrokeStore:
 
     def load_strokes(self, board_id: int) -> list[Stroke]:
         mems = self.client.smembers(str(board_id))
-        assert isinstance(mems, Set)
+        assert isinstance(mems, set)
 
         strokes = {mem.decode("utf-8") for mem in mems}
 
