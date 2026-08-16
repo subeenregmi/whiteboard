@@ -2,7 +2,7 @@
 
 import useWhiteboard from "@/app/hooks/whiteboard/useWhiteboard";
 import Toolbar from "@/app/ui/components/toolbar/toolbar";
-import { IconToCursor } from "../icon";
+import { IconToCursor } from "../icons";
 
 export default function Whiteboard() {
 	const {

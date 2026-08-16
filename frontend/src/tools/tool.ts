@@ -1,4 +1,4 @@
-import type { IconVariant } from "@/app/ui/components/icon";
+import type { IconVariant } from "@/app/ui/components/icons";
 import type { Position } from "@/models/constants";
 
 export abstract class Tool {

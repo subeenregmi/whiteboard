@@ -1,4 +1,10 @@
-import { type Ref, useCallback, useEffect, useRef } from "react";
+import {
+	type MouseEvent,
+	type Ref,
+	useCallback,
+	useEffect,
+	useRef,
+} from "react";
 import type { Position } from "@/models/constants";
 import type { Data } from "@/models/data";
 import WhiteboardWS from "@/utils/ws";
@@ -38,16 +44,16 @@ export default function useWhiteboard() {
 		canvas.style.width = `${window.innerWidth}px`;
 		canvas.style.height = `${window.innerHeight}px`;
 
-		contextRef.current = context!;
+		contextRef.current = context;
 
 		ws.registerHandler(strokeHandler);
-	}, [ws.registerHandler, strokeHandler]);
+	}, [ws.registerHandler, strokeHandler, ws]);
 
 	useEffect(() => {
 		currentToolRef.current = currentTool;
 	}, [currentTool]);
 
-	const mouseMoveHandler = useCallback((e: any) => {
+	const mouseMoveHandler = useCallback((e: MouseEvent<HTMLCanvasElement>) => {
 		if (contextRef.current === null) return;
 		if (canvasRef.current === null) return;
 		if (currentToolRef.current === null) return;

@@ -1,5 +1,4 @@
 import logging
-from typing import List
 
 from fastapi import WebSocket
 
@@ -9,7 +8,7 @@ from models.data import Data
 # every whiteboard has its own connection manager instance
 class ConnectionManager:
     def __init__(self, logger: logging.Logger):
-        self.active_connections: List[WebSocket] = []
+        self.active_connections: list[WebSocket] = []
 
         self.logger = logger
 

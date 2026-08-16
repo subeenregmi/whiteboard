@@ -22,10 +22,10 @@ function strokeHandler(ctx: CanvasRenderingContext2D | null, s: Stroke) {
 	ctx.beginPath();
 	ctx.moveTo(...s.coordinates[0]);
 	ctx.stroke();
-	s.coordinates.slice(1).map((pos) => {
+	for (const pos of s.coordinates.slice(1)) {
 		ctx.lineTo(...pos);
 		ctx.stroke();
-	});
+	}
 }
 
 export default function useWSHandlers(

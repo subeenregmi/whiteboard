@@ -223,8 +223,9 @@ ipython_config.py
 
 
 # pyenv
-
-.python-version
+#   .python-version is deliberately tracked: CI reads it via setup-python's
+#   python-version-file, mirroring how frontend/.nvmrc pins Node for setup-node.
+# .python-version
 
 
 
