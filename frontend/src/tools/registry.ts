@@ -1,6 +1,7 @@
 import { Action } from "@/models/constants";
 import type { Data } from "@/models/data";
 import type { Stroke } from "@/models/stroke";
+import type { HandMove } from "../models/hand-move";
 import { Eraser } from "./eraser";
 import { Hand } from "./hand";
 import { Pen } from "./pen";
@@ -21,8 +22,15 @@ export function newTools(sendData: (d: Data) => void): Tools {
 		});
 	};
 
+	const sendHandMove = (h: HandMove) => {
+		sendData({
+			action: Action.HandMove,
+			data: h,
+		});
+	};
+
 	return {
-		hand: new Hand(),
+		hand: new Hand(sendHandMove),
 		pen: new Pen(sendStroke),
 		eraser: new Eraser(),
 	};

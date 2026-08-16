@@ -11,6 +11,7 @@ export type Position = [number, number];
 export enum Action {
 	Stroke = 1,
 	Erase = 2,
+	HandMove = 3,
 }
 
 export const Colors = {
