@@ -1,10 +1,12 @@
 import type { Action } from "./constants";
 import type { Erase } from "./erase";
+import type { HandMove } from "./hand-move";
 import type { Stroke } from "./stroke";
 
 export type ActionDataMap = {
 	[Action.Stroke]: Stroke;
 	[Action.Erase]: Erase;
+	[Action.HandMove]: HandMove;
 };
 
 export type Data = {

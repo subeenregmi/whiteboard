@@ -1,6 +1,9 @@
 import { Action } from "@/models/constants";
 import type { Data, DataHandler, DataHandlerMap } from "@/models/data";
 
+const UNIMPLEMENTED_HANDLER = () =>
+	console.log("handler has not been implemented!");
+
 export default class WhiteboardWS {
 	private uri: string;
 	private ws: WebSocket;
@@ -11,8 +14,9 @@ export default class WhiteboardWS {
 		this.uri = "ws://localhost:8000/ws/1";
 		this.ws = new WebSocket(this.uri);
 		this.handlers = {
-			[Action.Stroke]: () => {},
-			[Action.Erase]: () => {},
+			[Action.Stroke]: UNIMPLEMENTED_HANDLER,
+			[Action.Erase]: UNIMPLEMENTED_HANDLER,
+			[Action.HandMove]: UNIMPLEMENTED_HANDLER,
 		};
 
 		this.ws.onopen = () => {
@@ -33,6 +37,9 @@ export default class WhiteboardWS {
 				break;
 			case Action.Erase:
 				this.handlers[Action.Erase] = handler.handler;
+				break;
+			case Action.HandMove:
+				this.handlers[Action.HandMove] = handler.handler;
 				break;
 		}
 	}
@@ -58,6 +65,9 @@ export default class WhiteboardWS {
 				break;
 			case Action.Erase:
 				this.handlers[Action.Erase](data.data);
+				break;
+			case Action.HandMove:
+				this.handlers[Action.HandMove](data.data);
 				break;
 		}
 	}

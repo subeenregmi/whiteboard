@@ -6,3 +6,4 @@ type Position = tuple[float, float]
 class Action(IntEnum):
     Stroke = 1
     Erase = 2
+    HandMove = 3

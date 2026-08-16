@@ -340,3 +340,5 @@ web/.yarn/*
 *.rdb
 
 .direnv/
+
+.claude/

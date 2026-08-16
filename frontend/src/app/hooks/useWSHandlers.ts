@@ -6,7 +6,8 @@ import {
 	DEFAULT_LINE_JOIN,
 	ThicknessValues,
 } from "@/models/constants";
-import type { DataHandler } from "@/models/data";
+import type { Data, DataHandler } from "@/models/data";
+import type { HandMove } from "@/models/hand-move";
 import type { Stroke } from "@/models/stroke";
 
 function strokeHandler(ctx: CanvasRenderingContext2D | null, s: Stroke) {
@@ -28,18 +29,30 @@ function strokeHandler(ctx: CanvasRenderingContext2D | null, s: Stroke) {
 	}
 }
 
+function handMoveHandler(ctx: CanvasRenderingContext2D | null, h: HandMove) {
+	if (ctx === null) return;
+
+	ctx.fillRect(h.position[0], h.position[1], 25, 25);
+}
+
 export default function useWSHandlers(
 	ctxRef: RefObject<CanvasRenderingContext2D | null>,
-): { strokeHandler: DataHandler } {
-	const handler = useCallback(
+): { strokeHandler: DataHandler; handMoveHandler: DataHandler } {
+	const handleStroke = useCallback(
 		(s: Stroke) => strokeHandler(ctxRef.current, s),
+		[ctxRef],
+	);
+
+	const handleHandMove = useCallback(
+		(h: HandMove) => handMoveHandler(ctxRef.current, h),
 		[ctxRef],
 	);
 
 	return useMemo(
 		() => ({
-			strokeHandler: { action: Action.Stroke, handler },
+			strokeHandler: { action: Action.Stroke, handler: handleStroke },
+			handMoveHandler: { action: Action.HandMove, handler: handleHandMove },
 		}),
-		[handler],
+		[handleStroke, handleHandMove],
 	);
 }

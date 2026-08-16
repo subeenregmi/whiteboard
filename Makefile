@@ -15,3 +15,6 @@ flush-cache:
 
 attach-redis:
 	@docker exec -it whiteboard-redis redis-cli
+
+logs:
+	@docker compose logs -f -t

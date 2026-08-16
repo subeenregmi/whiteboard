@@ -26,7 +26,7 @@ export default function useWhiteboard() {
 	const { tools, currentTool, setTool } = useTools(sendData);
 	const currentToolRef = useRef(currentTool);
 
-	const { strokeHandler } = useWSHandlers(contextRef);
+	const { strokeHandler, handMoveHandler } = useWSHandlers(contextRef);
 
 	const position: Ref<Position> = useRef([0, 0]);
 
@@ -47,7 +47,8 @@ export default function useWhiteboard() {
 		contextRef.current = context;
 
 		ws.registerHandler(strokeHandler);
-	}, [ws.registerHandler, strokeHandler, ws]);
+		ws.registerHandler(handMoveHandler);
+	}, [ws.registerHandler, strokeHandler, handMoveHandler, ws]);
 
 	useEffect(() => {
 		currentToolRef.current = currentTool;
@@ -95,6 +96,7 @@ export default function useWhiteboard() {
 		setTool,
 		currentToolRef,
 		strokeHandler,
+		handMoveHandler,
 		mouseDownHandler,
 		mouseMoveHandler,
 		mouseUpHandler,
